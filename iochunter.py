@@ -34,6 +34,18 @@ def extrair_cves(conteudo):
     return cves
 
 
+def extrair_md5(conteudo):
+    # Extração de hashes MD5 usando regex
+    md5_encontrados = re.findall(r'\b[a-fA-F0-9]{32}\b', conteudo)
+    return md5_encontrados
+
+
+def extrair_sha1(conteudo):
+    # Extração de hashes SHA-1 usando regex
+    sha1_encontrados = re.findall(r'\b[a-fA-F0-9]{40}\b', conteudo)
+    return sha1_encontrados
+
+
 def exibir_resultados(resultados):
     print("Resultados encontrados:\n")
 
@@ -47,10 +59,20 @@ def exibir_resultados(resultados):
     quantidade_ipv4_falsos = len(resultados['ipv4_falsos_candidatos'])
     print(f"\nQuantidade de falsos candidatos a IPv4: {quantidade_ipv4_falsos}\n")
 
+    for md5 in resultados['md5']:
+        print(f"Hash MD5 encontrado: {md5}")
+    quantidade_md5 = len(resultados['md5'])
+    print(f"\nQuantidade de hashes MD5 encontrados: {quantidade_md5}\n")
+
     for sha256 in resultados['sha256']:
         print(f"Hash SHA-256 encontrado: {sha256}")
     quantidade_sha256 = len(resultados['sha256'])
     print(f"\nQuantidade de hashes SHA-256 encontrados: {quantidade_sha256}\n")
+
+    for sha1 in resultados['sha1']:
+        print(f"Hash SHA-1 encontrado: {sha1}")
+    quantidade_sha1 = len(resultados['sha1'])
+    print(f"\nQuantidade de hashes SHA-1 encontrados: {quantidade_sha1}\n")
 
     for cve in resultados['cves']:
         print(f"CVE encontrado: {cve}")
@@ -64,13 +86,18 @@ def analisar_conteudo(conteudo):
     resultados = {
         "ipv4": [],
         "ipv4_falsos_candidatos": [],
+        "md5": [],
         "sha256": [],
+        "sha1": [],
         "cves": []
     }
     
     resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo)
-    resultados["sha256"] = extrair_sha256(conteudo)
+    resultados["md5"] = extrair_md5(conteudo)
+    resultados["sha256"] = extrair_sha256(conteudo)    
+    resultados["sha1"] = extrair_sha1(conteudo)
     resultados["cves"] = extrair_cves(conteudo)
+
 
     return resultados
 
@@ -100,7 +127,7 @@ def main(caminho_arquivo, formato):
 def configurar_argumentos():
     parser = argparse.ArgumentParser(
         prog="ioc-hunter",
-        description="Extrair endereços IPv4, hashes SHA-256 e CVEs de um arquivo de texto."
+        description="Extrai Indicators of Compromise (IOCs) de arquivos de texto e logs."
     )
 
     parser.add_argument(
