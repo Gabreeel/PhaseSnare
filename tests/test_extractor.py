@@ -1,4 +1,5 @@
-from iochunter import extrair_ipv4, extrair_sha256, extrair_cves, analisar_conteudo
+from iochunter import extrair_ipv4, extrair_sha256, extrair_cves, analisar_conteudo, formatar_resultados_json
+import json
 
 def test_extrair_ipv4_valido():
     ipv4_validos, ipv4_invalidos = extrair_ipv4('192.168.0.112')
@@ -42,3 +43,16 @@ def test_analisar_conteudo():
     ],
     "cves": ["CVE-2024-3094"]
 }
+
+def test_formatar_resultados_json():
+    resultados = {
+    "ipv4": ["192.168.1.10"],
+    "ipv4_falsos_candidatos": [],
+    "sha256": [],
+    "cves": ["CVE-2024-3094"]
+}
+
+    texto_json = formatar_resultados_json(resultados)
+    resultado_reconvertido = json.loads(texto_json)
+
+    assert resultado_reconvertido == resultados

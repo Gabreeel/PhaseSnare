@@ -1,6 +1,7 @@
-import re
-import ipaddress
 import argparse
+import ipaddress
+import re
+import json
 
 def extrair_ipv4(conteudo):
         # Extração de possíveis endereços IPv4 usando regex
@@ -59,26 +60,38 @@ def exibir_resultados(resultados):
     print(f"Quantidade de CVEs únicos encontrados: {quantidade_cves_unicos}\n")
 
 
-def main(caminho_arquivo):
+def analisar_conteudo(conteudo):
     resultados = {
-    "ipv4": [],
-    "ipv4_falsos_candidatos": [],
-    "sha256": [],
-    "cves": []
+        "ipv4": [],
+        "ipv4_falsos_candidatos": [],
+        "sha256": [],
+        "cves": []
     }
+    
+    resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo)
+    resultados["sha256"] = extrair_sha256(conteudo)
+    resultados["cves"] = extrair_cves(conteudo)
+
+    return resultados
+
+
+def formatar_resultados_json(resultados):
+    return json.dumps(resultados, indent=4, ensure_ascii=False)
+
+
+def main(caminho_arquivo, formato):
     try:
         with open(caminho_arquivo, 'r', encoding="utf-8") as arquivo_aberto:
             conteudo_arquivo = arquivo_aberto.read()
             caracteres = len(conteudo_arquivo)
 
-        print(f"O arquivo {caminho_arquivo} possui {caracteres} caracteres.\n")
+        resultados = analisar_conteudo(conteudo_arquivo)
 
-        # Extração e validação de endereços IPv4
-        resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo_arquivo)
-        resultados["sha256"] = extrair_sha256(conteudo_arquivo)
-        resultados["cves"] = extrair_cves(conteudo_arquivo)
-
-        exibir_resultados(resultados)
+        if formato == 'json':
+            print(formatar_resultados_json(resultados))
+        elif formato == 'txt':
+            print(f"O arquivo {caminho_arquivo} possui {caracteres} caracteres.\n")
+            exibir_resultados(resultados)
 
     except FileNotFoundError:
         print(f"Erro: O arquivo '{caminho_arquivo}' não foi encontrado.")
@@ -95,10 +108,18 @@ def configurar_argumentos():
         help="Caminho do arquivo de log a ser analisado."
     )
 
+    parser.add_argument(
+        "-f",
+        "--format",
+        choices=["txt", "json"],
+        default="txt",
+        help="Formato da saída. Padrão: txt."
+    )
+
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = configurar_argumentos()
-    main(args.log_file)
+    main(args.log_file, args.format)
 
 
