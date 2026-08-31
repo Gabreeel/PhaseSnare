@@ -2,12 +2,6 @@ import re
 import ipaddress
 import argparse
 
-parser = argparse.ArgumentParser(prog="ioc-hunter", description="Extrair endereços IPv4, hashes SHA-256 e CVEs de um arquivo de texto.")
-parser.add_argument("log_file", help="Caminho do arquivo de log a ser analisado.")
-args = parser.parse_args()
-
-caminho_arquivo = args.log_file
-
 def extrair_ipv4(conteudo):
         # Extração de possíveis endereços IPv4 usando regex
     ipv4_candidatos = re.findall(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b', conteudo)
@@ -25,10 +19,12 @@ def extrair_ipv4(conteudo):
 
     return ipv4_lista, ipv4_falsos_candidatos
 
+
 def extrair_sha256(conteudo):
     # Extração de hashes SHA-256 usando regex
     sha256_encontrados = re.findall(r'\b[a-fA-F0-9]{64}\b', conteudo)
     return sha256_encontrados
+
 
 def extrair_cves(conteudo):
     # Extração de CVEs usando regex
@@ -36,12 +32,6 @@ def extrair_cves(conteudo):
     cves = [cve.upper() for cve in cves]
     return cves
 
-resultados = {
-    "ipv4": [],
-    "ipv4_falsos_candidatos": [],
-    "sha256": [],
-    "cves": []
-    }
 
 def exibir_resultados(resultados):
     print("Resultados encontrados:\n")
@@ -68,7 +58,14 @@ def exibir_resultados(resultados):
     print(f"\nQuantidade de CVEs encontrados: {quantidade_cves}")
     print(f"Quantidade de CVEs únicos encontrados: {quantidade_cves_unicos}\n")
 
-def main():
+
+def main(caminho_arquivo):
+    resultados = {
+    "ipv4": [],
+    "ipv4_falsos_candidatos": [],
+    "sha256": [],
+    "cves": []
+    }
     try:
         with open(caminho_arquivo, 'r', encoding="utf-8") as arquivo_aberto:
             conteudo_arquivo = arquivo_aberto.read()
@@ -86,7 +83,22 @@ def main():
     except FileNotFoundError:
         print(f"Erro: O arquivo '{caminho_arquivo}' não foi encontrado.")
 
+
+def configurar_argumentos():
+    parser = argparse.ArgumentParser(
+        prog="ioc-hunter",
+        description="Extrair endereços IPv4, hashes SHA-256 e CVEs de um arquivo de texto."
+    )
+
+    parser.add_argument(
+        "log_file",
+        help="Caminho do arquivo de log a ser analisado."
+    )
+
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    main()
+    args = configurar_argumentos()
+    main(args.log_file)
 
 
