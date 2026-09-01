@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6
 import json
 
 def test_extrair_ipv4_valido():
@@ -7,7 +7,19 @@ def test_extrair_ipv4_valido():
     assert ipv4_validos == ['192.168.0.112']
     assert ipv4_invalidos == []
 
-def test_extrair_ipv4_invalido():
+def test_extrair_ipv6_invalido():
+    ipv6_validos, ipv6_invalidos = extrair_ipv6("aa:bb:cc:dd:ee:ff")
+
+    assert ipv6_validos == []
+    assert ipv6_invalidos == ["aa:bb:cc:dd:ee:ff"]
+
+def test_extrair_ipv6_valido():
+    ipv6_validos, ipv6_invalidos = extrair_ipv6('2001:0db8:85a3:0000:0000:8a2e:0370:7334')
+
+    assert ipv6_validos == ['2001:0db8:85a3:0000:0000:8a2e:0370:7334']
+    assert ipv6_invalidos == []
+
+def test_extrair_ipv6_invalido():
     ipv4_validos, ipv4_invalidos = extrair_ipv4("256.300.12.1")
 
     assert ipv4_validos == []

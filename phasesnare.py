@@ -21,6 +21,24 @@ def extrair_ipv4(conteudo):
     return ipv4_lista, ipv4_falsos_candidatos
 
 
+def extrair_ipv6(conteudo):
+        # Extração de possíveis endereços IPv6 usando regex
+    ipv6_candidatos = re.findall(r'(?<![0-9A-Fa-f:])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![0-9A-Fa-f:])')
+
+    ipv6_lista = []
+    ipv6_falsos_candidatos = []
+
+        # Validação dos endereços IPv4 encontrados
+    for ipv6 in ipv6_candidatos:
+        try:
+            ipaddress.IPv6Address(ipv6)
+            ipv6_lista.append(ipv6)
+        except ipaddress.AddressValueError:
+            ipv6_falsos_candidatos.append(ipv6)
+
+    return ipv6_lista, ipv6_falsos_candidatos
+
+
 def extrair_sha256(conteudo):
     # Extração de hashes SHA-256 usando regex
     sha256_encontrados = re.findall(r'\b[a-fA-F0-9]{64}\b', conteudo)
@@ -59,6 +77,16 @@ def exibir_resultados(resultados):
     quantidade_ipv4_falsos = len(resultados['ipv4_falsos_candidatos'])
     print(f"\nQuantidade de falsos candidatos a IPv4: {quantidade_ipv4_falsos}\n")
 
+    for ipv6 in resultados['ipv6']:
+        print(f"Endereço IPV6 válidos: {ipv6}")
+    quantidade_ipv6 = len(resultados['ipv6'])
+    print(f"\nQuantidade de endereços IPV6 válidos: {quantidade_ipv6}\n")
+
+    for ipv6_falso in resultados['ipv6_falsos_candidatos']:
+        print(f"Falso candidato a IPV6: {ipv6_falso}")
+    quantidade_ipv6_falsos = len(resultados['ipv6_falsos_candidatos'])
+    print(f"\nQuantidade de falsos candidatos a IPV6: {quantidade_ipv6_falsos}\n")
+
     for md5 in resultados['md5']:
         print(f"Hash MD5 encontrado: {md5}")
     quantidade_md5 = len(resultados['md5'])
@@ -86,6 +114,8 @@ def analisar_conteudo(conteudo):
     resultados = {
         "ipv4": [],
         "ipv4_falsos_candidatos": [],
+        "ipv6": [],
+        "ipv6_falsos_candidatos": [],
         "md5": [],
         "sha256": [],
         "sha1": [],
@@ -93,6 +123,7 @@ def analisar_conteudo(conteudo):
     }
     
     resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo)
+    resultados["ipv6"], resultados["ipv6_falsos_candidatos"] = extrair_ipv6(conteudo)
     resultados["md5"] = extrair_md5(conteudo)
     resultados["sha256"] = extrair_sha256(conteudo)    
     resultados["sha1"] = extrair_sha1(conteudo)

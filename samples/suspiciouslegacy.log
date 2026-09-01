@@ -1,0 +1,55 @@
+# --- Apache/Nginx Access Logs (Standard Combined Log Format) ---
+192.168.1.45 - - [10/Aug/2026:13:55:01 +0000] "GET /api/v1/health HTTP/1.1" 200 128 "-" "Mozilla/5.0"
+10.0.0.12 - admin [10/Aug/2026:13:55:04 +0000] "POST /login HTTP/1.1" 401 512 "-" "curl/7.68.0"
+203.0.113.195 - - [10/Aug/2026:13:55:10 +0000] "GET /images/logo.png HTTP/1.1" 304 0 "https://example.com" "Mozilla/5.0"
+
+# --- Vulnerability Scanner & Threat Intel Logs (CVEs + IPv4) ---
+Aug 10 14:00:01 vuln-scanner[1102]: Target 198.51.100.42 is vulnerable to CVE-2021-44228 (Log4Shell)
+Aug 10 14:01:15 threat-feed[3301]: Exploitation attempt detected for cve-2023-38606 from source IP 203.0.113.88
+Aug 10 14:01:40 threat-feed[3301]: Advisory published: Cve-2024-21762 affecting SSL-VPN gateways
+
+# --- Linux Auth Logs / SSH Brute-Force Attempts ---
+Aug 10 14:02:11 server sshd[14201]: Failed password for invalid user admin from 198.51.100.42 port 49152 ssh2
+Aug 10 14:02:15 server sshd[14205]: Failed password for root from 198.51.100.42 port 49158 ssh2
+Aug 10 14:02:18 server sshd[14210]: Accepted publickey for ubuntu from 172.16.254.1 port 52110 ssh2
+
+# --- Endpoint / EDR Detection Logs (SHA-256 + IPv4 + CVE) ---
+Aug 10 14:05:22 edr-agent[8812]: Process creation detected: /tmp/suspicious_loader.sh (SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855) initiated connection to 198.51.100.99:443
+Aug 10 14:06:01 edr-agent[8812]: File download complete from 203.0.113.88 | File: update.exe | Hash: 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae | Exploit: cve-2017-0144
+Aug 10 14:07:30 edr-agent[8815]: Malicious payload blocked: SHA256=11a5a54b391307b227c4f4a3fb3510ec1f215f762dd59955e8c13f9f74051a8f dropped by IP 192.168.1.100
+
+# --- JSON Logs (Application / Threat Intelligence Feed) ---
+{"timestamp": "2026-08-10T14:10:00Z", "level": "WARN", "service": "auth-service", "client_ip": "104.28.14.88", "message": "Rate limit exceeded"}
+{"timestamp": "2026-08-10T14:10:05Z", "level": "INFO", "service": "payment-gateway", "forwarded_for": ["198.51.100.7", "172.16.0.50"], "status": "success"}
+{"timestamp": "2026-08-10T14:12:19Z", "level": "CRITICAL", "indicator_type": "malware_sample", "sha256": "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e", "c2_ip": "198.51.100.200", "associated_cve": "CVE-2026-12345"}
+
+# --- Edge Cases, Noise & False Positives ---
+# Valid IPv4 com porta:
+Connection established to 192.0.2.1:8080 from remote end.
+
+# SHA-256 em caixa alta:
+ALERT: Threat actor dumped tool with SHA256: 4F8B708230D8E9F52AE9A006132D372863B8B9B16E4D1A258C28A14619C4A732
+
+# Formatos de CVEs Inválidos / Falsos Positivos (Devem ser IGNORADOS):
+# Falta o hífen: CVE202144228
+# Ano com 2 dígitos ou inválido: CVE-21-44228
+# Identificador do ID com menos de 4 dígitos: CVE-2023-12
+# Apenas letras soltas sem identificador válido: CVE-XXXX-YYYY
+# Substring de um identificador fictício longo: MYCVE-2024-99999999999
+
+# Outros tipos de Hashes (NÃO são SHA-256 e DEVEM ser ignorados):
+# MD5: 5d41402abc4b2a76b9719d911017c592
+# SHA-1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+# Hash trincado (63 chars): e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85
+
+# IPv6 (Ignorar):
+2001:0db8:85a3:0000:0000:8a2e:0370:7334 - - [10/Aug/2026:14:15:00 +0000] "GET / HTTP/1.1" 200
+fe80::1ff:fe23:4567%eth0 connected.
+
+# IPs Inválidos:
+Error code 256.300.12.1 detected in subsystem.
+Version number 1.2.3.456 is not a valid IPv4.
+Local loopback test: 127.0.0.1 e broadcast 255.255.255.255.
+
+# Múltiplos IPs em uma linha:
+Proxy chain: 203.0.113.5 -> 10.0.1.150 -> 192.168.0.1
