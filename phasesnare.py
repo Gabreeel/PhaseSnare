@@ -126,7 +126,7 @@ def main(caminho_arquivo, formato):
 
 def configurar_argumentos():
     parser = argparse.ArgumentParser(
-        prog="ioc-hunter",
+        prog="phase-snare",
         description="Extrai Indicators of Compromise (IOCs) de arquivos de texto e logs."
     )
 

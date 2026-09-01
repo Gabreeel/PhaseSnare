@@ -1,4 +1,4 @@
-from iochunter import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json
 import json
 
 def test_extrair_ipv4_valido():

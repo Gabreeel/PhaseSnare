@@ -1,21 +1,24 @@
-# IOC-Hunter
+# PhaseSnare
 
-IOC-Hunter is a Python command-line tool for extracting Indicators of Compromise (IOCs) from text files and security logs.
+**PhaseSnare** is a lightweight Python command-line tool for extracting and validating Indicators of Compromise (IOCs) from text files and security logs.
 
-The project is developed as a practical exercise in Python, cybersecurity automation, log analysis, testing, and software engineering practices.
+The name comes from the idea of a spider's snare: relevant indicators are caught from large amounts of otherwise unrelated log data.
 
-## Current Features
+The project is being developed incrementally as a practical exercise in Python, cybersecurity automation, log analysis, testing, and software engineering.
 
-IOC-Hunter currently supports:
+## Features
 
-* IPv4 address extraction and validation
+PhaseSnare currently supports:
+
+* IPv4 address extraction
+* IPv4 address validation
 * Detection of malformed IPv4 candidates
 * MD5 hash extraction
 * SHA-1 hash extraction
 * SHA-256 hash extraction
 * CVE identifier extraction
 * CVE normalization
-* Text output
+* Plain-text output
 * JSON output
 * Command-line file input
 * Automated tests with pytest
@@ -25,42 +28,39 @@ IOC-Hunter currently supports:
 Analyze a text or log file:
 
 ```bash
-python iochunter.py samples/suspicious.log
+python phasesnare.py samples/suspicious.log
 ```
 
-The default output format is plain text.
+By default, PhaseSnare displays the results as human-readable text.
 
-JSON output is available with:
+### JSON output
+
+Use the `--format` option to produce structured JSON output:
 
 ```bash
-python iochunter.py samples/suspicious.log --format json
+python phasesnare.py samples/suspicious.log --format json
 ```
 
-Command-line help:
+This makes PhaseSnare output easier to consume in scripts, pipelines, or other security tooling.
+
+### Command-line help
 
 ```bash
-python iochunter.py --help
+python phasesnare.py --help
 ```
 
 ## Example
 
-Plain-text output:
+Given a log containing indicators such as:
 
 ```text
-Resultados encontrados:
-
-Endereço IPv4 válido: 192.168.1.45
-
-Quantidade de endereços IPv4 válidos: 1
-
-Hash MD5 encontrado: 5d41402abc4b2a76b9719d911017c592
-
-Hash SHA-1 encontrado: da39a3ee5e6b4b0d3255bfef95601890afd80709
-
-CVE encontrado: CVE-2024-3094
+Connection from 192.168.1.45
+MD5: 5d41402abc4b2a76b9719d911017c592
+SHA1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+Exploit targeting cve-2024-3094
 ```
 
-JSON output:
+PhaseSnare can produce structured JSON output:
 
 ```json
 {
@@ -83,28 +83,37 @@ JSON output:
 
 ## Testing
 
-The project uses `pytest` for automated testing.
+PhaseSnare uses `pytest` for automated testing.
 
-Run the test suite from the project root:
+Run the full test suite from the project root:
 
 ```bash
 python -m pytest
 ```
 
-Tests currently cover individual IOC extractors, malformed inputs, CVE normalization, combined content analysis, and JSON serialization.
+The current test suite covers:
+
+* Valid and invalid IPv4 extraction
+* IPv4 validation
+* MD5 extraction
+* SHA-1 extraction
+* SHA-256 extraction
+* CVE normalization
+* Combined content analysis
+* JSON serialization
 
 ## Requirements
 
 * Python 3
 * pytest, for running the automated tests
 
-The application itself currently uses only modules from the Python standard library.
+The PhaseSnare application itself currently depends only on modules from the Python standard library.
 
 ## Project Structure
 
 ```text
-ioc-hunter/
-├── iochunter.py
+PhaseSnare/
+├── phasesnare.py
 ├── samples/
 │   └── suspicious.log
 ├── tests/
@@ -114,23 +123,64 @@ ioc-hunter/
 └── .gitignore
 ```
 
-The sample log contains valid indicators, malformed values, and unrelated data for testing extraction and validation behavior.
+## How It Works
 
-## Development Status
+PhaseSnare separates IOC extraction from input and output handling.
 
-IOC-Hunter is under active development.
+The general processing flow is:
+
+```text
+Log or text file
+       |
+       v
+Content analysis
+       |
+       +-- IPv4 extraction and validation
+       +-- MD5 extraction
+       +-- SHA-1 extraction
+       +-- SHA-256 extraction
+       +-- CVE extraction and normalization
+       |
+       v
+Structured results
+       |
+       +-- Plain-text output
+       |
+       +-- JSON output
+```
+
+This separation allows new IOC extractors and output formats to be added without tightly coupling them to the command-line interface.
+
+## Current Limitations
+
+PhaseSnare currently performs primarily syntactic IOC extraction.
+
+For example, a hexadecimal string matching the expected size of an MD5 or SHA hash can be identified as a hash candidate, but PhaseSnare does not determine whether the value is actually malicious.
+
+Similarly, a syntactically valid IP address is not necessarily a malicious indicator.
+
+Threat classification and enrichment are intentionally outside the current scope.
+
+## Roadmap
 
 Planned improvements include:
 
-* IPv6 extraction
+* IPv6 extraction and validation
 * URL extraction
 * Domain extraction
 * E-mail address extraction
-* Deduplication options
+* IOC deduplication
 * CSV output
 * Output file support
 * Whitelisting
 * Additional CLI options
-* Optional threat intelligence integrations
+* Improved test coverage
+* Optional threat intelligence enrichment
 
 Development is intentionally incremental, prioritizing readable code, validation, automated testing, and clear separation of responsibilities.
+
+## Project Status
+
+PhaseSnare is under active development.
+
+The current version is focused on establishing a reliable IOC extraction core before adding enrichment, external integrations, or more complex analysis features.
