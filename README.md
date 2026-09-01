@@ -95,6 +95,9 @@ The current test suite covers:
 
 * Valid and invalid IPv4 extraction
 * IPv4 validation
+* IPv6 address extraction
+* IPv6 address validation
+* Detection of malformed IPv6 candidates
 * MD5 extraction
 * SHA-1 extraction
 * SHA-256 extraction
@@ -136,6 +139,7 @@ Log or text file
 Content analysis
        |
        +-- IPv4 extraction and validation
+       +-- IPv6 extraction and validation
        +-- MD5 extraction
        +-- SHA-1 extraction
        +-- SHA-256 extraction
@@ -165,7 +169,6 @@ Threat classification and enrichment are intentionally outside the current scope
 
 Planned improvements include:
 
-* IPv6 extraction and validation
 * URL extraction
 * Domain extraction
 * E-mail address extraction

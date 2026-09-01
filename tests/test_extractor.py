@@ -8,10 +8,10 @@ def test_extrair_ipv4_valido():
     assert ipv4_invalidos == []
 
 def test_extrair_ipv6_invalido():
-    ipv6_validos, ipv6_invalidos = extrair_ipv6("aa:bb:cc:dd:ee:ff")
+    ipv6_validos, ipv6_invalidos = extrair_ipv6("2001:db8:zzzz::1")
 
     assert ipv6_validos == []
-    assert ipv6_invalidos == ["aa:bb:cc:dd:ee:ff"]
+    assert ipv6_invalidos == ["2001:db8:zzzz::1"]
 
 def test_extrair_ipv6_valido():
     ipv6_validos, ipv6_invalidos = extrair_ipv6('2001:0db8:85a3:0000:0000:8a2e:0370:7334')
@@ -65,6 +65,8 @@ def test_analisar_conteudo():
         Connection from 192.168.1.10
         Malformed address 256.300.12.1
         Exploit targeting cve-2024-3094
+        IPv6 connection from 2001:db8::10
+        Invalid IPv6 2001:db8:zzzz::1
         MD5: 5d41402abc4b2a76b9719d911017c592
         SHA1: da39a3ee5e6b4b0d3255bfef95601890afd80709
         SHA256: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
@@ -73,6 +75,8 @@ def test_analisar_conteudo():
     assert resultados == {
         "ipv4": ["192.168.1.10"],
         "ipv4_falsos_candidatos": ["256.300.12.1"],
+        "ipv6": ["2001:db8::10"],
+        "ipv6_falsos_candidatos": ["2001:db8:zzzz::1"],
         "md5": [
             "5d41402abc4b2a76b9719d911017c592"
         ],

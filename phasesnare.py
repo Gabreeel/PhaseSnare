@@ -22,13 +22,20 @@ def extrair_ipv4(conteudo):
 
 
 def extrair_ipv6(conteudo):
-        # Extração de possíveis endereços IPv6 usando regex
-    ipv6_candidatos = re.findall(r'(?<![0-9A-Fa-f:])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![0-9A-Fa-f:])')
+    ipv6_candidatos = re.findall(
+        r'(?<![0-9A-Za-z:])(?:[0-9A-Za-z]{0,4}:){2,7}[0-9A-Za-z]{0,4}(?![0-9A-Za-z:])',
+        conteudo
+    )
+
+    ipv6_candidatos = [
+        candidato
+        for candidato in ipv6_candidatos
+        if "::" in candidato or candidato.count(":") == 7
+    ]
 
     ipv6_lista = []
     ipv6_falsos_candidatos = []
 
-        # Validação dos endereços IPv4 encontrados
     for ipv6 in ipv6_candidatos:
         try:
             ipaddress.IPv6Address(ipv6)
