@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios
 import json
 
 def test_extrair_ipv4_valido():
@@ -91,7 +91,8 @@ def test_analisar_conteudo():
         "cves": ["CVE-2024-3094"],
         "urls": ["https://example.com/login"],
         "urls_falsos_candidatos": [],
-        "emails": ["karendoe@mail.com"]
+        "emails": ["karendoe@mail.com"],
+        "dominios": ["example.com", "mail.com"]
     }
 
 def test_formatar_resultados_json():
@@ -158,3 +159,12 @@ def test_falhar_em_extrair_email_invalido():
     )
 
     assert emails == []
+
+def test_extrair_dominio_valido():
+    dominios = extrair_dominios(
+        "Here's the free GTA VI download link for PC: https://veryevillink.com/downloadm4lw4r3"
+    )
+
+    assert dominios == [
+        "veryevillink.com"
+    ]

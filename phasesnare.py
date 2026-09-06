@@ -92,6 +92,11 @@ def extrair_emails(conteudo):
     return emails
 
 
+def extrair_dominios(conteudo):
+    # Extração de dominios usando regex
+    dominios = re.findall(r'(?i)\b(?:https?:\/\/)?(?:www\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,63})\b', conteudo)
+    return dominios
+
 def exibir_resultados(resultados):
     print("Resultados encontrados:\n")
 
@@ -152,6 +157,11 @@ def exibir_resultados(resultados):
     quantidade_emails = len(resultados['emails'])
     print(f"\nQuantidade de E-mails encontrados: {quantidade_emails}")
 
+    for dominio in resultados['dominios']:
+        print(f"Domínio encontrado: {dominio}")
+    quantidade_dominios = len(resultados['dominios'])
+    print(f"\nQuantidade de domínios encontrados: {quantidade_dominios}\n")
+
 def analisar_conteudo(conteudo):
     resultados = {
         "ipv4": [],
@@ -164,7 +174,8 @@ def analisar_conteudo(conteudo):
         "cves": [],
         "urls": [],
         "urls_falsos_candidatos": [],
-        "emails": []
+        "emails": [],
+        "dominios": []
     }
     
     resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo)
@@ -175,6 +186,7 @@ def analisar_conteudo(conteudo):
     resultados["cves"] = extrair_cves(conteudo)
     resultados["urls"], resultados["urls_falsos_candidatos"] = extrair_urls(conteudo)
     resultados["emails"] = extrair_emails(conteudo)
+    resultados["dominios"] = extrair_dominios(conteudo)
 
     return resultados
 

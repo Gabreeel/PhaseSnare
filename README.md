@@ -21,6 +21,7 @@ PhaseSnare currently supports:
 * URL extraction
 * URL validation
 * E-mail address extraction
+* Domain extraction
 * Plain-text output
 * JSON output
 * Command-line file input
@@ -106,6 +107,7 @@ The current test suite covers:
 * SHA-256 extraction
 * URL extraction
 * E-mail address extraction
+* Domain extraction
 * CVE normalization
 * Combined content analysis
 * JSON serialization
@@ -151,6 +153,7 @@ Content analysis
        +-- CVE extraction and normalization
        +-- URL extraction and validation
        +-- E-mail address extraction
+       +-- Domain extraction
        |
        v
 Structured results
@@ -176,7 +179,6 @@ Threat classification and enrichment are intentionally outside the current scope
 
 Planned improvements include:
 
-* Domain extraction
 * IOC deduplication
 * CSV output
 * Output file support
