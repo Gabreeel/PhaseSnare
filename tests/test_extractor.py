@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados
 import json
 
 def test_extrair_ipv4_valido():
@@ -190,3 +190,46 @@ def test_nao_extrair_email_com_dominio_malformado():
     emails = extrair_emails("user@example..com")
 
     assert emails == []
+
+def test_deduplicar_resultados():
+    resultados = {
+        "ipv4": [
+            "192.0.2.10",
+            "192.0.2.10",
+            "10.0.0.5"
+        ],
+        "cves": [
+            "CVE-2024-3094",
+            "CVE-2024-3094",
+            "CVE-2021-44228"
+        ]
+    }
+
+    resultados_unicos = deduplicar_resultados(resultados)
+
+    assert resultados_unicos == {
+        "ipv4": [
+            "192.0.2.10",
+            "10.0.0.5"
+        ],
+        "cves": [
+            "CVE-2024-3094",
+            "CVE-2021-44228"
+        ]
+    }
+
+def test_deduplicar_resultados_preserva_ordem():
+    resultados = {
+        "dominios": [
+            "first.example",
+            "second.example",
+            "first.example"
+        ]
+    }
+
+    resultados_unicos = deduplicar_resultados(resultados)
+
+    assert resultados_unicos["dominios"] == [
+        "first.example",
+        "second.example"
+    ]

@@ -24,6 +24,7 @@ PhaseSnare currently supports:
 * Domain extraction
 * Plain-text output
 * JSON output
+* Remove duplicate IOCs option
 * Command-line file input
 * Automated tests with pytest
 
@@ -46,6 +47,14 @@ python phasesnare.py samples/suspicious.log --format json
 ```
 
 This makes PhaseSnare output easier to consume in scripts, pipelines, or other security tooling.
+
+### Remove duplicates
+
+Use the `--unique` option to produce unique only output:
+
+```bash
+python phasesnare.py samples/suspicious.log --unique
+```
 
 ### Command-line help
 
@@ -110,6 +119,7 @@ The current test suite covers:
 * Domain extraction
 * CVE normalization
 * Combined content analysis
+* IOC deduplication
 * JSON serialization
 
 ## Requirements
@@ -158,6 +168,8 @@ Content analysis
        v
 Structured results
        |
+       +-- IOC deduplicated output in any format
+       |
        +-- Plain-text output
        |
        +-- JSON output
@@ -179,7 +191,6 @@ Threat classification and enrichment are intentionally outside the current scope
 
 Planned improvements include:
 
-* IOC deduplication
 * CSV output
 * Output file support
 * Whitelisting

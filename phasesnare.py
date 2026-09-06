@@ -168,6 +168,16 @@ def exibir_resultados(resultados):
     quantidade_dominios = len(resultados['dominios'])
     print(f"\nQuantidade de domínios encontrados: {quantidade_dominios}\n")
 
+
+def deduplicar_resultados(resultados):
+    resultados_unicos = {}
+
+    for tipo, valores in resultados.items():
+        resultados_unicos[tipo] = list(dict.fromkeys(valores))
+
+    return resultados_unicos
+
+
 def analisar_conteudo(conteudo):
     resultados = {
         "ipv4": [],
@@ -201,13 +211,16 @@ def formatar_resultados_json(resultados):
     return json.dumps(resultados, indent=4, ensure_ascii=False)
 
 
-def main(caminho_arquivo, formato):
+def main(caminho_arquivo, formato, unique):
     try:
         with open(caminho_arquivo, 'r', encoding="utf-8") as arquivo_aberto:
             conteudo_arquivo = arquivo_aberto.read()
             caracteres = len(conteudo_arquivo)
 
         resultados = analisar_conteudo(conteudo_arquivo)
+
+        if unique:
+            resultados = deduplicar_resultados(resultados)
 
         if formato == 'json':
             print(formatar_resultados_json(resultados))
@@ -238,10 +251,17 @@ def configurar_argumentos():
         help="Formato da saída. Padrão: txt."
     )
 
+    parser.add_argument(
+        "-u",
+        "--unique",
+        action="store_true",
+        help="Remove indicadores duplicados da saída."
+    )
+
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = configurar_argumentos()
-    main(args.log_file, args.format)
+    main(args.log_file, args.format, args.unique)
 
 
