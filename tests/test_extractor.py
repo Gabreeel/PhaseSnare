@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails
 import json
 
 def test_extrair_ipv4_valido():
@@ -70,6 +70,8 @@ def test_analisar_conteudo():
         MD5: 5d41402abc4b2a76b9719d911017c592
         SHA1: da39a3ee5e6b4b0d3255bfef95601890afd80709
         SHA256: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+        Request to https://example.com/login
+        Nigerian prince phishing sent to karendoe@mail.com
     """)
 
     assert resultados == {
@@ -86,7 +88,10 @@ def test_analisar_conteudo():
         "sha1": [
             "da39a3ee5e6b4b0d3255bfef95601890afd80709"
         ],
-        "cves": ["CVE-2024-3094"]
+        "cves": ["CVE-2024-3094"],
+        "urls": ["https://example.com/login"],
+        "urls_falsos_candidatos": [],
+        "emails": ["karendoe@mail.com"]
     }
 
 def test_formatar_resultados_json():
@@ -119,3 +124,37 @@ def test_extrair_url_com_porta_query():
         "https://example.net:8443/admin?id=42"
     ]
     assert urls_invalidas == []
+
+def test_extrair_url_falsa_e_separar():
+    urls, urls_invalidas = extrair_urls(
+        "http://:8080/test"
+    )
+
+    assert urls == []
+    assert urls_invalidas == [
+        "http://:8080/test"
+    ]
+
+def test_url_ainda_nao_detectavel():
+    urls, urls_invalidas = extrair_urls(
+        "hxxp://example.com/payload"
+    )
+
+    assert urls == []
+    assert urls_invalidas == []
+
+def test_extrair_email_valido():
+    emails = extrair_emails(
+        "Hey dude, send me an e-mail at b1gp4ul@hellyeah.com"
+    )
+
+    assert emails == [
+        "b1gp4ul@hellyeah.com"
+    ]
+
+def test_falhar_em_extrair_email_invalido():
+    emails = extrair_emails(
+        "Hey dude, sent you an e-mail from b1gp4ul@@.hellyeah.com"
+    )
+
+    assert emails == []

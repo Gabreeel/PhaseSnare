@@ -73,17 +73,23 @@ def extrair_sha1(conteudo):
 
 
 def extrair_urls(conteudo):
-    # Extração de URLs
+    # Extração de URLs usando regex e validado usando urllib
     urls_candidatos = re.findall(r'https?://[^\s"\'<>]+', conteudo)
     urls = []
     urls_falsos_candidatos = []
     for url in urls_candidatos:
         resultado = urlparse(url)
-        if resultado.scheme in ("http", "https") and resultado.netloc:
+        if resultado.scheme in ("http", "https") and resultado.hostname:
             urls.append(url)
         else:
             urls_falsos_candidatos.append(url)
     return urls, urls_falsos_candidatos
+
+
+def extrair_emails(conteudo):
+    # Extração de e-mails usando regex
+    emails = re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', conteudo)
+    return emails
 
 
 def exibir_resultados(resultados):
@@ -141,6 +147,11 @@ def exibir_resultados(resultados):
     quantidade_urls_falsas = len(resultados['urls_falsos_candidatos'])
     print(f"\nQuantidade de URLs falsas encontradas e separadas: {quantidade_urls_falsas}\n")
 
+    for email in resultados['emails']:
+        print(f"E-mail encontrado: {email}")
+    quantidade_emails = len(resultados['emails'])
+    print(f"\nQuantidade de E-mails encontrados: {quantidade_emails}")
+
 def analisar_conteudo(conteudo):
     resultados = {
         "ipv4": [],
@@ -152,7 +163,8 @@ def analisar_conteudo(conteudo):
         "sha1": [],
         "cves": [],
         "urls": [],
-        "urls_falsos_candidatos": []
+        "urls_falsos_candidatos": [],
+        "emails": []
     }
     
     resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo)
@@ -162,6 +174,7 @@ def analisar_conteudo(conteudo):
     resultados["sha1"] = extrair_sha1(conteudo)
     resultados["cves"] = extrair_cves(conteudo)
     resultados["urls"], resultados["urls_falsos_candidatos"] = extrair_urls(conteudo)
+    resultados["emails"] = extrair_emails(conteudo)
 
     return resultados
 
