@@ -88,13 +88,19 @@ def extrair_urls(conteudo):
 
 def extrair_emails(conteudo):
     # Extração de e-mails usando regex
-    emails = re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', conteudo)
+    emails = re.findall(r'\b[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}\b', conteudo)
     return emails
 
 
 def extrair_dominios(conteudo):
-    # Extração de dominios usando regex
-    dominios = re.findall(r'(?i)\b(?:https?:\/\/)?(?:www\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,63})\b', conteudo)
+    dominios = re.findall(
+        r'(?i)(?<![a-z0-9._-])'
+        r'([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?'
+        r'(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*'
+        r'\.[a-z]{2,63})'
+        r'(?![a-z0-9_-])',
+        conteudo
+    )
     return dominios
 
 def exibir_resultados(resultados):
@@ -116,9 +122,9 @@ def exibir_resultados(resultados):
     print(f"\nQuantidade de endereços IPV6 válidos: {quantidade_ipv6}\n")
 
     for ipv6_falso in resultados['ipv6_falsos_candidatos']:
-        print(f"Falso candidato a IPV6: {ipv6_falso}")
+        print(f"Falso candidato a IPv6: {ipv6_falso}")
     quantidade_ipv6_falsos = len(resultados['ipv6_falsos_candidatos'])
-    print(f"\nQuantidade de falsos candidatos a IPV6: {quantidade_ipv6_falsos}\n")
+    print(f"\nQuantidade de falsos candidatos a IPv6: {quantidade_ipv6_falsos}\n")
 
     for md5 in resultados['md5']:
         print(f"Hash MD5 encontrado: {md5}")
@@ -148,9 +154,9 @@ def exibir_resultados(resultados):
     print(f"\nQuantidade de URLs encontradas: {quantidade_urls}\n")
 
     for url_falsa in resultados['urls_falsos_candidatos']:
-        print(f"Algo que parecido com uma URL foi encontrado: {url_falsa}")
+        print(f"Possível URL inválida encontrada: {url_falsa}")
     quantidade_urls_falsas = len(resultados['urls_falsos_candidatos'])
-    print(f"\nQuantidade de URLs falsas encontradas e separadas: {quantidade_urls_falsas}\n")
+    print(f"\nQuantidade de URLs invalidadas encontradas e separadas: {quantidade_urls_falsas}\n")
 
     for email in resultados['emails']:
         print(f"E-mail encontrado: {email}")

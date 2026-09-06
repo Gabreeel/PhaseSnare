@@ -168,3 +168,25 @@ def test_extrair_dominio_valido():
     assert dominios == [
         "veryevillink.com"
     ]
+
+def test_nao_extrair_dominio_com_hifen_inicial():
+    dominios = extrair_dominios("-bad.example.com")
+
+    assert dominios == []
+
+
+def test_nao_extrair_parte_de_dominio_invalido():
+    dominios = extrair_dominios("bad_domain.example.com")
+
+    assert dominios == []
+
+
+def test_preservar_subdominio_www():
+    dominios = extrair_dominios("www.example.com")
+
+    assert dominios == ["www.example.com"]
+
+def test_nao_extrair_email_com_dominio_malformado():
+    emails = extrair_emails("user@example..com")
+
+    assert emails == []
