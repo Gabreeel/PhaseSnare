@@ -2,6 +2,7 @@ import argparse
 import ipaddress
 import re
 import json
+from urllib.parse import urlparse
 
 def extrair_ipv4(conteudo):
         # Extração de possíveis endereços IPv4 usando regex
@@ -71,6 +72,20 @@ def extrair_sha1(conteudo):
     return sha1_encontrados
 
 
+def extrair_urls(conteudo):
+    # Extração de URLs
+    urls_candidatos = re.findall(r'https?://[^\s"\'<>]+', conteudo)
+    urls = []
+    urls_falsos_candidatos = []
+    for url in urls_candidatos:
+        resultado = urlparse(url)
+        if resultado.scheme in ("http", "https") and resultado.netloc:
+            urls.append(url)
+        else:
+            urls_falsos_candidatos.append(url)
+    return urls, urls_falsos_candidatos
+
+
 def exibir_resultados(resultados):
     print("Resultados encontrados:\n")
 
@@ -116,6 +131,15 @@ def exibir_resultados(resultados):
     print(f"\nQuantidade de CVEs encontrados: {quantidade_cves}")
     print(f"Quantidade de CVEs únicos encontrados: {quantidade_cves_unicos}\n")
 
+    for url in resultados['urls']:
+        print(f'URL encontrada: {url}')
+    quantidade_urls = len(resultados['urls'])
+    print(f"\nQuantidade de URLs encontradas: {quantidade_urls}\n")
+
+    for url_falsa in resultados['urls_falsos_candidatos']:
+        print(f"Algo que parecido com uma URL foi encontrado: {url_falsa}")
+    quantidade_urls_falsas = len(resultados['urls_falsos_candidatos'])
+    print(f"\nQuantidade de URLs falsas encontradas e separadas: {quantidade_urls_falsas}\n")
 
 def analisar_conteudo(conteudo):
     resultados = {
@@ -126,7 +150,9 @@ def analisar_conteudo(conteudo):
         "md5": [],
         "sha256": [],
         "sha1": [],
-        "cves": []
+        "cves": [],
+        "urls": [],
+        "urls_falsos_candidatos": []
     }
     
     resultados["ipv4"], resultados["ipv4_falsos_candidatos"] = extrair_ipv4(conteudo)
@@ -135,7 +161,7 @@ def analisar_conteudo(conteudo):
     resultados["sha256"] = extrair_sha256(conteudo)    
     resultados["sha1"] = extrair_sha1(conteudo)
     resultados["cves"] = extrair_cves(conteudo)
-
+    resultados["urls"], resultados["urls_falsos_candidatos"] = extrair_urls(conteudo)
 
     return resultados
 

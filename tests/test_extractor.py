@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls
 import json
 
 def test_extrair_ipv4_valido():
@@ -19,7 +19,7 @@ def test_extrair_ipv6_valido():
     assert ipv6_validos == ['2001:0db8:85a3:0000:0000:8a2e:0370:7334']
     assert ipv6_invalidos == []
 
-def test_extrair_ipv6_invalido():
+def test_extrair_ipv4_invalido():
     ipv4_validos, ipv4_invalidos = extrair_ipv4("256.300.12.1")
 
     assert ipv4_validos == []
@@ -101,3 +101,21 @@ def test_formatar_resultados_json():
     resultado_reconvertido = json.loads(texto_json)
 
     assert resultado_reconvertido == resultados
+
+def test_extrair_url_valida():
+    urls, urls_invalidas = extrair_urls(
+        "Request to https://example.com/login"
+    )
+
+    assert urls == ["https://example.com/login"]
+    assert urls_invalidas == []
+
+def test_extrair_url_com_porta_query():
+    urls, urls_invalidas = extrair_urls(
+        "Request to https://example.net:8443/admin?id=42"
+    )
+
+    assert urls == [
+        "https://example.net:8443/admin?id=42"
+    ]
+    assert urls_invalidas == []
