@@ -103,70 +103,72 @@ def extrair_dominios(conteudo):
     )
     return dominios
 
-def exibir_resultados(resultados):
-    print("Resultados encontrados:\n")
 
-    for ipv4 in resultados['ipv4']:
-        print(f"Endereço IPv4 válido: {ipv4}")
-    quantidade_ipv4 = len(resultados['ipv4'])
-    print(f"\nQuantidade de endereços IPv4 válidos: {quantidade_ipv4}\n")
+def formatar_resultados_txt(resultados):
+    linhas = ["Resultados encontrados:", ""]
 
-    for ipv4_falso in resultados['ipv4_falsos_candidatos']:
-        print(f"Falso candidato a IPv4: {ipv4_falso}")
-    quantidade_ipv4_falsos = len(resultados['ipv4_falsos_candidatos'])
-    print(f"\nQuantidade de falsos candidatos a IPv4: {quantidade_ipv4_falsos}\n")
+    for ipv4 in resultados["ipv4"]:
+        linhas.append(f"Endereço IPv4 válido: {ipv4}")
 
-    for ipv6 in resultados['ipv6']:
-        print(f"Endereço IPV6 válidos: {ipv6}")
-    quantidade_ipv6 = len(resultados['ipv6'])
-    print(f"\nQuantidade de endereços IPV6 válidos: {quantidade_ipv6}\n")
+    linhas.append(f"Quantidade de endereços IPv4 válidos: {len(resultados['ipv4'])}")
 
-    for ipv6_falso in resultados['ipv6_falsos_candidatos']:
-        print(f"Falso candidato a IPv6: {ipv6_falso}")
-    quantidade_ipv6_falsos = len(resultados['ipv6_falsos_candidatos'])
-    print(f"\nQuantidade de falsos candidatos a IPv6: {quantidade_ipv6_falsos}\n")
+    for ipv4_falso in resultados["ipv4_falsos_candidatos"]:
+        linhas.append(f"Falso candidato a IPv4: {ipv4_falso}")
 
-    for md5 in resultados['md5']:
-        print(f"Hash MD5 encontrado: {md5}")
-    quantidade_md5 = len(resultados['md5'])
-    print(f"\nQuantidade de hashes MD5 encontrados: {quantidade_md5}\n")
+    linhas.append(f"Quantidade de falsos candidatos a IPv4: {len(resultados['ipv4_falsos_candidatos'])}")
 
-    for sha256 in resultados['sha256']:
-        print(f"Hash SHA-256 encontrado: {sha256}")
-    quantidade_sha256 = len(resultados['sha256'])
-    print(f"\nQuantidade de hashes SHA-256 encontrados: {quantidade_sha256}\n")
+    for ipv6 in resultados["ipv6"]:
+        linhas.append(f"Endereço IPV6 válido: {ipv6}")
 
-    for sha1 in resultados['sha1']:
-        print(f"Hash SHA-1 encontrado: {sha1}")
-    quantidade_sha1 = len(resultados['sha1'])
-    print(f"\nQuantidade de hashes SHA-1 encontrados: {quantidade_sha1}\n")
+    linhas.append(f"\nQuantidade de endereços IPV6 válidos: {len(resultados['ipv6'])}\n")
 
-    for cve in resultados['cves']:
-        print(f"CVE encontrado: {cve}")
-    quantidade_cves = len(resultados['cves'])
-    quantidade_cves_unicos = len(set(resultados['cves']))
-    print(f"\nQuantidade de CVEs encontrados: {quantidade_cves}")
-    print(f"Quantidade de CVEs únicos encontrados: {quantidade_cves_unicos}\n")
+    for ipv6_falso in resultados["ipv6_falsos_candidatos"]:
+        linhas.append(f"Falso candidato a IPv6: {ipv6_falso}")
 
-    for url in resultados['urls']:
-        print(f'URL encontrada: {url}')
-    quantidade_urls = len(resultados['urls'])
-    print(f"\nQuantidade de URLs encontradas: {quantidade_urls}\n")
+    linhas.append(f"Quantidade de falsos candidatos a IPv6: {len(resultados['ipv6_falsos_candidatos'])}")
+    
+    for md5 in resultados["md5"]:
+        linhas.append(f"Hash MD5 encontrado: {md5}")
 
-    for url_falsa in resultados['urls_falsos_candidatos']:
-        print(f"Possível URL inválida encontrada: {url_falsa}")
-    quantidade_urls_falsas = len(resultados['urls_falsos_candidatos'])
-    print(f"\nQuantidade de URLs invalidadas encontradas e separadas: {quantidade_urls_falsas}\n")
+    linhas.append(f"Quantidade de hashes MD5 encontrados: {len(resultados['md5'])}")
 
-    for email in resultados['emails']:
-        print(f"E-mail encontrado: {email}")
-    quantidade_emails = len(resultados['emails'])
-    print(f"\nQuantidade de E-mails encontrados: {quantidade_emails}")
+    for sha256 in resultados["sha256"]:
+        linhas.append(f"Hash SHA-256 encontrado: {sha256}")
 
-    for dominio in resultados['dominios']:
-        print(f"Domínio encontrado: {dominio}")
-    quantidade_dominios = len(resultados['dominios'])
-    print(f"\nQuantidade de domínios encontrados: {quantidade_dominios}\n")
+    linhas.append(f"Quantidade de hashes SHA-256 encontrados: {len(resultados['sha256'])}")
+    
+    for sha1 in resultados["sha1"]:
+        linhas.append(f"Hash SHA-1 encontrado: {sha1}")
+
+    linhas.append(f"Quantidade de hashes SHA-1 encontrados: {len(resultados['sha1'])}")
+    
+    for cve in resultados["cves"]:
+        linhas.append(f"CVE encontrado: {cve}")
+
+    linhas.append(f"Quantidade de CVEs encontrados: {len(resultados['cves'])}")
+    linhas.append(f"Quantidade de CVEs únicos encontrados: {len(set(resultados['cves']))}")
+
+    for url in resultados["urls"]:
+        linhas.append(f"URL encontrada: {url}")
+
+    linhas.append(f"Quantidade de URLs encontradas: {len(resultados['urls'])}")
+    
+    for url_falsa in resultados["urls_falsos_candidatos"]:
+        linhas.append(f"Possível URL inválida encontrada: {url_falsa}")
+
+    linhas.append(f"Quantidade de URLs invalidadas encontradas e separadas: {len(resultados['urls_falsos_candidatos'])}")
+
+    for email in resultados["emails"]:
+        linhas.append(f"E-mail encontrado: {email}")
+
+    linhas.append(f"Quantidade de E-mails encontradas: {len(resultados['emails'])}")
+    
+    for dominio in resultados["dominios"]:
+        linhas.append(f"Domínio encontrado: {dominio}")
+
+    linhas.append(f"Quantidade de dominios encontrados: {len(resultados['dominios'])}")
+    
+    return "\n".join(linhas)
 
 
 def deduplicar_resultados(resultados):
@@ -211,22 +213,28 @@ def formatar_resultados_json(resultados):
     return json.dumps(resultados, indent=4, ensure_ascii=False)
 
 
-def main(caminho_arquivo, formato, unique):
+def main(caminho_arquivo, formato, unique=False, output=None):
     try:
         with open(caminho_arquivo, 'r', encoding="utf-8") as arquivo_aberto:
             conteudo_arquivo = arquivo_aberto.read()
-            caracteres = len(conteudo_arquivo)
 
         resultados = analisar_conteudo(conteudo_arquivo)
 
         if unique:
             resultados = deduplicar_resultados(resultados)
 
-        if formato == 'json':
-            print(formatar_resultados_json(resultados))
-        elif formato == 'txt':
-            print(f"O arquivo {caminho_arquivo} possui {caracteres} caracteres.\n")
-            exibir_resultados(resultados)
+        if formato == "json":
+            saida = formatar_resultados_json(resultados)
+
+        elif formato == "txt":
+            saida = formatar_resultados_txt(resultados)
+        if output:
+            with open(output, "w", encoding="utf-8") as arquivo_saida:
+                arquivo_saida.write(saida)
+
+            print(f"Resultado salvo em: {output}")
+        else:
+            print(saida)
 
     except FileNotFoundError:
         print(f"Erro: O arquivo '{caminho_arquivo}' não foi encontrado.")
@@ -258,10 +266,16 @@ def configurar_argumentos():
         help="Remove indicadores duplicados da saída."
     )
 
+    parser.add_argument(
+    "-o",
+    "--output",
+    help="Salva a saída em um arquivo."
+    )
+
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = configurar_argumentos()
-    main(args.log_file, args.format, args.unique)
+    main(args.log_file, args.format, args.unique, args.output)
 
 

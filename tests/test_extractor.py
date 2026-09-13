@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados
+from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, formatar_resultados_txt
 import json
 
 def test_extrair_ipv4_valido():
@@ -233,3 +233,35 @@ def test_deduplicar_resultados_preserva_ordem():
         "first.example",
         "second.example"
     ]
+
+def test_formatar_resultados_txt():
+    resultados = {
+        "ipv4": ["192.0.2.10"],
+        "ipv4_falsos_candidatos": []
+    }
+
+    texto = formatar_resultados_txt(resultados)
+
+    assert "192.0.2.10" in texto
+    assert "Quantidade de endereços IPv4 válidos: 1" in texto
+
+def test_formatar_resultados_txt():
+    resultados = {
+        "ipv4": ["192.0.2.10"],
+        "ipv4_falsos_candidatos": [],
+        "ipv6": [],
+        "ipv6_falsos_candidatos": [],
+        "md5": [],
+        "sha256": [],
+        "sha1": [],
+        "cves": [],
+        "urls": [],
+        "urls_falsos_candidatos": [],
+        "emails": [],
+        "dominios": []
+    }
+
+    texto = formatar_resultados_txt(resultados)
+
+    assert "192.0.2.10" in texto
+    assert "Quantidade de endereços IPv4 válidos: 1" in texto
