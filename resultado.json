@@ -1,0 +1,85 @@
+{
+    "ipv4": [
+        "192.0.2.10",
+        "10.0.0.5",
+        "127.0.0.1",
+        "255.255.255.255",
+        "192.0.2.55",
+        "192.0.2.25",
+        "192.0.2.26",
+        "198.51.100.23",
+        "203.0.113.77",
+        "192.0.2.100",
+        "198.51.100.200",
+        "192.0.2.200"
+    ],
+    "ipv4_falsos_candidatos": [
+        "256.300.12.1",
+        "1.2.3.456"
+    ],
+    "ipv6": [
+        "2001:db8::10",
+        "::1",
+        "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+        "fe80::1",
+        "2001:db8:abcd::42",
+        "2001:db8::200"
+    ],
+    "ipv6_falsos_candidatos": [
+        "2001:db8:::1",
+        "2001:db8:zzzz::1"
+    ],
+    "md5": [
+        "5d41402abc4b2a76b9719d911017c592"
+    ],
+    "sha256": [
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ],
+    "sha1": [
+        "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    ],
+    "cves": [
+        "CVE-2024-3094",
+        "CVE-2021-44228",
+        "CVE-2023-34362"
+    ],
+    "urls": [
+        "http://example.com/login",
+        "https://sub.example.org/path/to/resource",
+        "https://example.net:8443/admin?user=test&id=42",
+        "http://192.0.2.55/download.bin",
+        "https://portal.example.com/report?id=7#summary",
+        "https://example.com/assets/app.js",
+        "https://downloads.example.net/sample.exe",
+        "https://example.com/docs"
+    ],
+    "urls_falsos_candidatos": [],
+    "emails": [
+        "analyst@example.com",
+        "soc.team@example.org",
+        "response@example.net",
+        "help@example.com"
+    ],
+    "dominios": [
+        "example.com",
+        "sub.example.org",
+        "example.net",
+        "download.bin",
+        "portal.example.com",
+        "api.dev.example.net",
+        "soc.team",
+        "example.org",
+        "analyst.example.com",
+        "index.html",
+        "app.js",
+        "host.example.net",
+        "api.example.org",
+        "downloads.example.net",
+        "sample.exe",
+        "powershell.exe",
+        "phasesnare.py",
+        "suspiciouslog.txt"
+    ]
+}

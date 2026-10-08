@@ -1,0 +1,95 @@
+Resultados encontrados:
+
+Endereço IPv4 válido: 192.0.2.10
+Endereço IPv4 válido: 192.0.2.10
+Endereço IPv4 válido: 10.0.0.5
+Endereço IPv4 válido: 127.0.0.1
+Endereço IPv4 válido: 255.255.255.255
+Endereço IPv4 válido: 192.0.2.55
+Endereço IPv4 válido: 192.0.2.25
+Endereço IPv4 válido: 192.0.2.26
+Endereço IPv4 válido: 198.51.100.23
+Endereço IPv4 válido: 203.0.113.77
+Endereço IPv4 válido: 198.51.100.23
+Endereço IPv4 válido: 192.0.2.100
+Endereço IPv4 válido: 198.51.100.200
+Endereço IPv4 válido: 192.0.2.200
+Quantidade de endereços IPv4 válidos: 14
+Falso candidato a IPv4: 256.300.12.1
+Falso candidato a IPv4: 1.2.3.456
+Quantidade de falsos candidatos a IPv4: 2
+Endereço IPV6 válido: 2001:db8::10
+Endereço IPV6 válido: ::1
+Endereço IPV6 válido: 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+Endereço IPV6 válido: fe80::1
+Endereço IPV6 válido: 2001:db8::10
+Endereço IPV6 válido: 2001:db8:abcd::42
+Endereço IPV6 válido: 2001:db8::200
+
+Quantidade de endereços IPV6 válidos: 7
+
+Falso candidato a IPv6: 2001:db8:::1
+Falso candidato a IPv6: 2001:db8:zzzz::1
+Quantidade de falsos candidatos a IPv6: 2
+Hash MD5 encontrado: 5d41402abc4b2a76b9719d911017c592
+Quantidade de hashes MD5 encontrados: 1
+Hash SHA-256 encontrado: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+Hash SHA-256 encontrado: BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD
+Hash SHA-256 encontrado: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Quantidade de hashes SHA-256 encontrados: 3
+Hash SHA-1 encontrado: da39a3ee5e6b4b0d3255bfef95601890afd80709
+Quantidade de hashes SHA-1 encontrados: 1
+CVE encontrado: CVE-2024-3094
+CVE encontrado: CVE-2021-44228
+CVE encontrado: CVE-2024-3094
+CVE encontrado: CVE-2023-34362
+Quantidade de CVEs encontrados: 4
+Quantidade de CVEs únicos encontrados: 3
+URL encontrada: http://example.com/login
+URL encontrada: https://sub.example.org/path/to/resource
+URL encontrada: https://example.net:8443/admin?user=test&id=42
+URL encontrada: http://192.0.2.55/download.bin
+URL encontrada: https://portal.example.com/report?id=7#summary
+URL encontrada: https://example.com/assets/app.js
+URL encontrada: https://downloads.example.net/sample.exe
+URL encontrada: https://example.com/docs
+Quantidade de URLs encontradas: 8
+Quantidade de URLs invalidadas encontradas e separadas: 0
+E-mail encontrado: analyst@example.com
+E-mail encontrado: soc.team@example.org
+E-mail encontrado: analyst@example.com
+E-mail encontrado: response@example.net
+E-mail encontrado: help@example.com
+Quantidade de E-mails encontradas: 5
+Domínio encontrado: example.com
+Domínio encontrado: sub.example.org
+Domínio encontrado: example.net
+Domínio encontrado: download.bin
+Domínio encontrado: portal.example.com
+Domínio encontrado: example.com
+Domínio encontrado: example.com
+Domínio encontrado: example.com
+Domínio encontrado: sub.example.org
+Domínio encontrado: api.dev.example.net
+Domínio encontrado: example.com
+Domínio encontrado: example.com
+Domínio encontrado: soc.team
+Domínio encontrado: example.org
+Domínio encontrado: example.com
+Domínio encontrado: example.com
+Domínio encontrado: analyst.example.com
+Domínio encontrado: example.com
+Domínio encontrado: index.html
+Domínio encontrado: example.com
+Domínio encontrado: app.js
+Domínio encontrado: host.example.net
+Domínio encontrado: api.example.org
+Domínio encontrado: downloads.example.net
+Domínio encontrado: sample.exe
+Domínio encontrado: example.net
+Domínio encontrado: example.com
+Domínio encontrado: example.com
+Domínio encontrado: powershell.exe
+Domínio encontrado: phasesnare.py
+Domínio encontrado: suspiciouslog.txt
+Quantidade de dominios encontrados: 31

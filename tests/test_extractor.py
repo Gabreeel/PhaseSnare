@@ -1,4 +1,4 @@
-from phasesnare import extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, formatar_resultados_txt
+from phasesnare import main, extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, formatar_resultados_txt
 import json
 
 def test_extrair_ipv4_valido():
@@ -234,16 +234,6 @@ def test_deduplicar_resultados_preserva_ordem():
         "second.example"
     ]
 
-def test_formatar_resultados_txt():
-    resultados = {
-        "ipv4": ["192.0.2.10"],
-        "ipv4_falsos_candidatos": []
-    }
-
-    texto = formatar_resultados_txt(resultados)
-
-    assert "192.0.2.10" in texto
-    assert "Quantidade de endereços IPv4 válidos: 1" in texto
 
 def test_formatar_resultados_txt():
     resultados = {
@@ -265,3 +255,68 @@ def test_formatar_resultados_txt():
 
     assert "192.0.2.10" in texto
     assert "Quantidade de endereços IPv4 válidos: 1" in texto
+
+
+def test_main_nao_sobrescrevendo_entrada(tmp_path, capsys):
+    arquivo = tmp_path / "entrada.txt"
+    conteudo_original = "Connection from 192.0.2.10\n"
+    arquivo.write_text(conteudo_original, encoding="utf-8")
+
+    codigo = main(str(arquivo), "json", output=str(arquivo))
+    capturado = capsys.readouterr()
+
+    assert codigo == 1
+    assert arquivo.read_text(encoding="utf-8") == conteudo_original
+    assert capturado.out == ""
+    assert "Erro: o arquivo de saída não pode ser o mesmo da entrada." in (
+        capturado.err
+    )
+
+
+
+def test_main_salva_json(tmp_path, capsys):
+    entrada = tmp_path / "entrada.txt"
+    destino = tmp_path / "resultado.json"
+    entrada.write_text("Connection from 192.0.2.10\n", encoding="utf-8")
+
+    codigo = main(str(entrada), "json", output=str(destino))
+
+    resultados = json.loads(destino.read_text(encoding="utf-8"))
+
+    assert resultados["ipv4"] == ["192.0.2.10"]
+    assert entrada.read_text(encoding="utf-8") == (
+        "Connection from 192.0.2.10\n"
+    )
+    assert "Resultado salvo em:" in capsys.readouterr().out
+    assert codigo == 0 
+
+
+def test_main_informa_falha_de_gravacao(tmp_path, capsys):
+    entrada = tmp_path / "entrada.txt"
+    destino = tmp_path / "pasta_inexistente" / "resultado.json"
+    entrada.write_text("Connection from 192.0.2.10\n", encoding="utf-8")
+
+    codigo = main(str(entrada), "json", output=str(destino))
+    capturado = capsys.readouterr()
+    mensagem = capturado.err
+
+    assert capturado.out == "" 
+    assert "Erro ao salvar arquivo" in mensagem
+    assert str(destino) in mensagem
+    assert "Erro ao ler arquivo" not in mensagem
+    assert "Resultado salvo em:" not in mensagem
+    assert not destino.exists()
+    assert codigo == 1
+    
+
+
+def test_main_retorna_erro_quando_entrada_nao_existe(tmp_path, capsys):
+    entrada = tmp_path / "inexistente.txt"
+    codigo = main(str(entrada), "json")
+    capturado = capsys.readouterr()
+    mensagem = capturado.err
+
+    assert capturado.out == ""
+    assert codigo == 1
+    assert "Erro ao ler arquivo" in mensagem
+    assert str(entrada) in mensagem

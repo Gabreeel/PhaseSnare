@@ -1,190 +1,139 @@
 # PhaseSnare
 
-**PhaseSnare** is a lightweight Python command-line tool for extracting, validating, normalizing, and organizing Indicators of Compromise (IOCs) from text files and security logs.
+PhaseSnare is a lightweight Python CLI for extracting IOC candidates from UTF-8 text files and security logs. It produces plain-text or JSON reports, optionally removes repeated values, and can save results to a file.
 
-The project started as a practical exercise to refresh Python skills while building something useful for cybersecurity analysis. It is now evolving into a reusable IOC extraction component that can also support malware-analysis and experimental research workflows.
+The project is developed as a practical Python learning exercise and is evolving toward a reusable component for malware-analysis research. Finding an indicator-shaped value does not establish that it is malicious.
 
-The name comes from the idea of a spider's snare: relevant indicators are caught from large amounts of otherwise unrelated text and log data.
+## Current capabilities
 
----
+- IPv4 and IPv6 candidate extraction with address validation using `ipaddress`.
+- MD5, SHA-1 and SHA-256 pattern extraction.
+- CVE identifier extraction and uppercase normalization.
+- HTTP/HTTPS URL extraction with basic structural checks.
+- E-mail, domain and subdomain extraction.
+- TXT and JSON output.
+- Exact-value deduplication with `--unique`, preserving first-occurrence order.
+- File output with `--output`.
+- Separate messages for input and output file errors, written to `stderr`.
+- Exit codes for success and handled failures.
+- Protection against writing output to the same resolved path as the input.
 
-## Features
+The application uses Python's standard library. `pytest` is needed for development tests.
 
-PhaseSnare currently supports:
+## Getting started
 
-### IOC extraction
-
-- IPv4 address extraction and validation
-- IPv6 address extraction and validation
-- Detection of malformed IP candidates
-- MD5 hash extraction
-- SHA-1 hash extraction
-- SHA-256 hash extraction
-- CVE identifier extraction and normalization
-- HTTP/HTTPS URL extraction and validation
-- E-mail address extraction
-- Domain and subdomain extraction
-
-### Output and processing
-
-- Human-readable plain-text output
-- JSON output
-- Duplicate removal with `--unique`
-- Preservation of indicator order when deduplicating
-- Command-line file input
-
-### Development quality
-
-- Automated testing with `pytest`
-- Individual extractor tests
-- Combined content-analysis tests
-- Validation and false-positive handling for selected IOC types
-- Separation between extraction, analysis, formatting, and CLI behavior
-
----
-
-## Usage
-
-Analyze a text or log file:
+Use Python 3 and run commands from the repository root. No application dependencies need to be installed.
 
 ```bash
 python phasesnare.py samples/suspicious.log
 ```
 
-By default, PhaseSnare prints a human-readable report.
+The default format is a human-readable TXT report.
 
-### JSON output
+### CLI options
 
-Use `--format` or `-f`:
+| Argument | Purpose |
+| --- | --- |
+| `log_file` | Path to the UTF-8 input file (required). |
+| `-f`, `--format` | Output format: `txt` or `json`. Default: `txt`. |
+| `-u`, `--unique` | Remove exact duplicates within each result category. |
+| `-o`, `--output` | Write the report to a file instead of printing it. |
+| `-h`, `--help` | Show command-line help. |
 
-```bash
-python phasesnare.py samples/suspicious.log --format json
-```
-
-or:
+Print JSON:
 
 ```bash
 python phasesnare.py samples/suspicious.log -f json
 ```
 
-### Remove duplicates
-
-Use `--unique` or `-u`:
+Print JSON with exact duplicates removed:
 
 ```bash
-python phasesnare.py samples/suspicious.log --unique
+python phasesnare.py samples/suspicious.log -f json -u
 ```
 
-Options can be combined:
+Save JSON:
 
 ```bash
-python phasesnare.py samples/suspicious.log --format json --unique
+python phasesnare.py samples/suspicious.log -f json -u -o resultado.json
 ```
 
-### Command-line help
+Save TXT:
 
 ```bash
-python phasesnare.py --help
+python phasesnare.py samples/suspicious.log -o resultado.txt
 ```
 
----
+### File output behavior
 
-## Example
+The destination's parent directory must already exist. An existing destination file is overwritten. The CLI rejects a destination whose resolved path matches the input path; this check does not cover every filesystem alias, such as hard links.
 
-Given content such as:
+On successful file output, the CLI prints a confirmation to `stdout`. Without `--output`, the report itself is written to `stdout`.
+
+Handled input/output errors and same-path rejection are reported to `stderr`.
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Processing completed successfully. |
+| `1` | A handled file access error or same-path rejection occurred. |
+| `2` | `argparse` rejected the command-line arguments. |
+
+Exit codes communicate status to other programs independently of the printed message. Unexpected exceptions are not yet consistently handled; see the limitations below.
+
+## Output and reuse
+
+Results are a dictionary of lists with these keys:
 
 ```text
-Connection from 192.0.2.10
-Connection from 192.0.2.10
-Exploit targeting cve-2024-3094
-Request to https://example.com/login
-Suspicious sender analyst@example.com
-SHA256: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+ipv4, ipv4_falsos_candidatos
+ipv6, ipv6_falsos_candidatos
+md5, sha1, sha256
+cves
+urls, urls_falsos_candidatos
+emails
+dominios
 ```
 
-PhaseSnare can produce structured JSON such as:
+The `*_falsos_candidatos` lists contain extracted candidates rejected by the current checks. They are not a complete inventory of malformed values in the input.
 
-```json
-{
-    "ipv4": [
-        "192.0.2.10"
-    ],
-    "ipv4_falsos_candidatos": [],
-    "ipv6": [],
-    "ipv6_falsos_candidatos": [],
-    "md5": [],
-    "sha256": [
-        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-    ],
-    "sha1": [],
-    "cves": [
-        "CVE-2024-3094"
-    ],
-    "urls": [
-        "https://example.com/login"
-    ],
-    "urls_falsos_candidatos": [],
-    "emails": [
-        "analyst@example.com"
-    ],
-    "dominios": [
-        "example.com"
-    ]
-}
+The analysis function can also be imported without running the CLI:
+
+```python
+from phasesnare import analisar_conteudo, deduplicar_resultados
+
+resultados = analisar_conteudo(
+    "Connection from 192.0.2.10; reference cve-2024-3094"
+)
+resultados = deduplicar_resultados(resultados)
+
+assert resultados["ipv4"] == ["192.0.2.10"]
+assert resultados["cves"] == ["CVE-2024-3094"]
 ```
 
-With `--unique`, repeated values are removed while preserving the order of their first occurrence.
+CVE values are normalized to uppercase. General canonicalization is not implemented: differently capitalized hashes and equivalent IPv6 spellings can remain distinct even with `--unique`. A domain found inside a URL or e-mail can also appear in the domain category.
 
----
-
-## How It Works
-
-PhaseSnare separates extraction logic from command-line and output responsibilities.
+## Architecture
 
 ```text
-Input file
-   |
-   v
-Read content
-   |
-   v
-analisar_conteudo()
-   |
-   +-- IPv4 extraction and validation
-   +-- IPv6 extraction and validation
-   +-- MD5 extraction
-   +-- SHA-1 extraction
-   +-- SHA-256 extraction
-   +-- CVE extraction and normalization
-   +-- URL extraction and validation
-   +-- E-mail extraction
-   +-- Domain extraction
-   |
-   v
-Structured results
-   |
-   +-- optional deduplication (--unique)
-   |
-   v
-Output formatting
-   |
-   +-- TXT
-   +-- JSON
+Read UTF-8 input
+    -> analisar_conteudo(): call independent extractors
+    -> optionally deduplicar_resultados()
+    -> formatar_resultados_txt() or formatar_resultados_json()
+    -> print report or write output file
 ```
 
-The extractors are intentionally kept independent from file reading and presentation logic.
+Extractors operate on strings and do not read files, query reputation services, or execute samples. `main()` coordinates file access and presentation and returns a status code. The script entry point passes that code to `sys.exit()`.
 
-This makes it possible to reuse the IOC-analysis layer later in scripts, pipelines, tests, or research tooling without depending on the CLI.
-
----
-
-## Project Structure
+The project currently fits in one module. Splitting responsibilities into separate modules is planned when comparison and evidence tracking justify it.
 
 ```text
 PhaseSnare/
 ├── phasesnare.py
 ├── samples/
-│   └── suspicious.log
+│   ├── suspicious.log
+│   └── suspiciouslegacy.log
 ├── tests/
 │   └── test_extractor.py
 ├── README.md
@@ -192,195 +141,68 @@ PhaseSnare/
 └── .gitignore
 ```
 
-The project currently remains intentionally small and primarily contained in a single Python module.
+## Development and tests
 
-Splitting the code into packages or multiple modules will only be considered when the complexity of the project justifies it.
-
----
-
-## Testing
-
-PhaseSnare uses `pytest`.
-
-Run the complete test suite from the repository root:
+Install the test dependency into your development environment:
 
 ```bash
-python -m pytest
+python -m pip install pytest
 ```
 
-The current suite covers:
+`requirements.txt` is currently empty; installing it does not install pytest.
 
-- valid and invalid IPv4 extraction
-- IPv4 semantic validation
-- valid and invalid IPv6 extraction
-- IPv6 semantic validation
-- MD5 extraction
-- SHA-1 extraction
-- SHA-256 extraction
-- CVE normalization
-- URL extraction and validation
-- unsupported/defanged URL behavior
-- e-mail extraction
-- malformed e-mail cases
-- domain extraction
-- malformed-domain false positives
-- preservation of subdomains
-- combined content analysis
-- JSON serialization
-- IOC deduplication
-- preservation of order during deduplication
+Run the suite:
 
----
+```bash
+python -m pytest -q
+```
 
-## Synthetic Sample Log
+Tests cover individual extractors, combined analysis, JSON/TXT formatting and deduplication. File-handling tests also cover JSON output, input preservation, missing input, invalid output destination, error messages and return codes from `main()`.
 
-`samples/suspicious.log` is a synthetic long-term testing fixture.
+File-handling tests use pytest's `tmp_path` fixture for isolated inputs and outputs and `capsys` to inspect `stdout` and `stderr`. Testing `main()` directly does not by itself verify process-level exit codes.
 
-It intentionally contains:
+`samples/suspicious.log` contains synthetic indicators, duplicates, malformed candidates and unrelated noise. It is useful for manual checks, but it is not an annotated accuracy benchmark.
 
-- valid indicators
-- malformed candidates
-- duplicate indicators
-- private, loopback, and reserved addresses
-- URLs
-- domains
-- e-mail addresses
-- hashes
-- CVEs
-- JSON-formatted log lines
-- Apache/SSH-style log entries
-- unrelated noise
+## Known limitations
 
-The file is intended to evolve with the project and support manual testing, regression checks, and future integration tests.
+PhaseSnare is an extraction prototype, not a malware verdict engine.
 
----
+- Extracted IPs, domains, URLs and hashes are not checked for maliciousness or reputation.
+- Hash patterns establish hexadecimal length, not algorithm provenance or association with a file.
+- CVE identifiers are matched by syntax; their existence is not verified.
+- Domain extraction can misclassify filenames such as `powershell.exe` and dotted text such as `soc.team`.
+- URL checks are basic. Trailing punctuation may be retained, uppercase schemes can be missed, and malformed bracketed hosts can raise an unhandled exception.
+- Some IPv6 forms, including IPv4-embedded addresses, can be extracted partially.
+- E-mail matching is heuristic and does not implement full standards validation.
+- Defanged indicators such as `hxxp://example[.]com` are not supported.
+- Input must be UTF-8 text. Decoding errors are not currently handled explicitly.
+- The entire input and results are held in memory; size limits and streaming are not implemented.
+- Results do not yet preserve source lines, positions or original-to-normalized mappings.
+- Packed/unpacked comparison, binary string extraction and unpacking are not implemented.
 
-## Current Limitations
+## Research direction
 
-PhaseSnare currently performs primarily **syntactic extraction and structural validation**.
-
-Finding an IOC-shaped value does not mean that the value is malicious.
-
-For example:
-
-- a syntactically valid IP address may be benign;
-- a hexadecimal value matching SHA-256 length may not correspond to malicious content;
-- a valid domain may be legitimate;
-- PhaseSnare currently does not perform reputation or threat-intelligence lookups.
-
-Some artifact formats are also intentionally unsupported for now, including defanged IOCs such as:
+The intended workflow consumes artifacts produced by other analysis tools:
 
 ```text
-hxxp://example[.]com
+Packed/unpacked sample pair
+    -> static-analysis tools
+    -> text artifacts
+    -> PhaseSnare extraction
+    -> structured results
+    -> comparison (planned)
 ```
 
-Support for those formats may be added explicitly in future versions.
+The first comparison feature will report indicators common to both artifacts and indicators observed only in each one. It will compare observations, not prove that packing caused a difference.
 
----
+An indicator absent from an artifact is not necessarily absent from the sample. Reproducible experiments must record sample identity, how each state was obtained, analysis-tool versions and parameters, and artifact hashes. Sample hashes must remain separate from hash-shaped values found in the text.
 
-## Research Direction
+## Prioritized roadmap
 
-PhaseSnare is also being prepared for use as an IOC-normalization component in malware-analysis experiments.
+1. **Reliability:** regression tests for malformed URLs and IPv6 boundaries, better encoding handling, and process-level CLI tests.
+2. **Comparison:** minimal normalization and deterministic common/exclusive sets from two artifacts, preserving current CLI usage.
+3. **Evidence and accuracy:** source tracking, versioned output schema, annotated fixtures, precision/recall measurements, and explicit defanged normalization.
+4. **Research workflows:** Windows/UNC paths and Registry artifacts, paired-sample metadata, batch processing, and experimental tables/CSV.
+5. **External use:** installation packaging, CI, a chosen license, and feedback from researchers and analysts using real workflows.
 
-A potential workflow is:
-
-```text
-malware sample
-     |
-     v
-static-analysis output
-     |
-     v
-PhaseSnare
-     |
-     v
-structured IOC results
-```
-
-For experiments involving multiple versions or states of a sample, PhaseSnare can eventually help produce comparable structured results, for example:
-
-```text
-packed sample
-    |
-static analysis
-    |
-PhaseSnare
-    |
-packed_iocs.json
-
-
-unpacked sample
-    |
-static analysis
-    |
-PhaseSnare
-    |
-unpacked_iocs.json
-```
-
-This direction may introduce additional artifact types and output features in future versions.
-
----
-
-## Roadmap
-
-### Near-term
-
-- Output to file with `--output`
-- CSV output
-- Additional CLI options
-- Improved integration tests
-- Better handling of punctuation and edge cases in extracted values
-
-### Malware-analysis / research support
-
-- Windows path extraction
-- UNC path extraction
-- Windows Registry key extraction
-- Defanged IOC normalization
-- Structured sample metadata
-- Packed/unpacked result comparison
-- Export formats suitable for experimental datasets
-
-### Longer-term
-
-- Whitelisting
-- IOC filtering by type
-- Threat-intelligence enrichment
-- Optional reputation lookups
-- Better separation into modules if project complexity requires it
-
----
-
-## Design Principles
-
-Development is intentionally incremental.
-
-The project currently prioritizes:
-
-1. readable Python
-2. predictable extractor behavior
-3. low dependency count
-4. automated testing
-5. clear separation of responsibilities
-6. reproducible output
-7. usefulness in practical cybersecurity workflows
-
-New complexity should only be introduced when it solves a real problem.
-
----
-
-## Requirements
-
-- Python 3
-- `pytest` for development and testing
-
-The PhaseSnare application itself currently relies only on Python's standard library.
-
----
-
-## Project Status
-
-PhaseSnare is under active development.
-
-The core IOC extraction layer is functional. Current development is moving from adding basic IOC types toward improving CLI usability, reproducible output, and support for malware-analysis research workflows.
+Possible future value lies in local, traceable comparison across sample states and analysis tools. A dashboard, online enrichment or commercial service will depend on demonstrated user needs rather than being prerequisites for the core tool.

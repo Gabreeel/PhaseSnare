@@ -3,6 +3,8 @@ import ipaddress
 import re
 import json
 from urllib.parse import urlparse
+from pathlib import Path
+import sys
 
 def extrair_ipv4(conteudo):
         # Extração de possíveis endereços IPv4 usando regex
@@ -215,29 +217,38 @@ def formatar_resultados_json(resultados):
 
 def main(caminho_arquivo, formato, unique=False, output=None):
     try:
-        with open(caminho_arquivo, 'r', encoding="utf-8") as arquivo_aberto:
+        with open(caminho_arquivo, "r", encoding="utf-8") as arquivo_aberto:
             conteudo_arquivo = arquivo_aberto.read()
+    except OSError as erro:
+        print(f"Erro ao ler arquivo '{caminho_arquivo}': {erro}", file=sys.stderr)
+        return 1
 
-        resultados = analisar_conteudo(conteudo_arquivo)
+    resultados = analisar_conteudo(conteudo_arquivo)
 
-        if unique:
-            resultados = deduplicar_resultados(resultados)
+    if unique:
+        resultados = deduplicar_resultados(resultados)
 
-        if formato == "json":
-            saida = formatar_resultados_json(resultados)
+    if formato == "json":
+        saida = formatar_resultados_json(resultados)
+    elif formato == "txt":
+        saida = formatar_resultados_txt(resultados)
 
-        elif formato == "txt":
-            saida = formatar_resultados_txt(resultados)
-        if output:
+    if output:
+        if Path(caminho_arquivo).resolve() == Path(output).resolve():
+            print("Erro: o arquivo de saída não pode ser o mesmo da entrada.", file=sys.stderr)
+            return 1
+        try:
             with open(output, "w", encoding="utf-8") as arquivo_saida:
                 arquivo_saida.write(saida)
+        except OSError as erro:
+            print(f"Erro ao salvar arquivo '{output}': {erro}", file=sys.stderr)
+            return 1
 
-            print(f"Resultado salvo em: {output}")
-        else:
-            print(saida)
+        print(f"Resultado salvo em: {output}")
+    else:
+        print(saida)
 
-    except FileNotFoundError:
-        print(f"Erro: O arquivo '{caminho_arquivo}' não foi encontrado.")
+    return 0
 
 
 def configurar_argumentos():
@@ -276,6 +287,4 @@ def configurar_argumentos():
 
 if __name__ == "__main__":
     args = configurar_argumentos()
-    main(args.log_file, args.format, args.unique, args.output)
-
-
+    sys.exit(main(args.log_file, args.format, args.unique, args.output))
