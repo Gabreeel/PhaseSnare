@@ -76,14 +76,19 @@ def extrair_sha1(conteudo):
 
 def extrair_urls(conteudo):
     # Extração de URLs usando regex e validado usando urllib
-    urls_candidatos = re.findall(r'https?://[^\s"\'<>]+', conteudo)
+    urls_candidatos = re.findall(r'https?://[^\s"\'<>]+', conteudo, flags=re.IGNORECASE)
     urls = []
     urls_falsos_candidatos = []
     for url in urls_candidatos:
-        resultado = urlparse(url)
-        if resultado.scheme in ("http", "https") and resultado.hostname:
-            urls.append(url)
-        else:
+        try:
+            resultado = urlparse(url)
+            # Acessar .port valida o formato e a faixa da porta
+            porta = resultado.port
+            if resultado.scheme in ("http", "https") and resultado.hostname:
+                urls.append(url)
+            else:
+                urls_falsos_candidatos.append(url)
+        except ValueError:
             urls_falsos_candidatos.append(url)
     return urls, urls_falsos_candidatos
 
@@ -180,6 +185,27 @@ def deduplicar_resultados(resultados):
         resultados_unicos[tipo] = list(dict.fromkeys(valores))
 
     return resultados_unicos
+
+
+def normalizar_hashes(valores):
+    hashes_normalizadas = []
+
+    for valor in valores:
+        hashes_normalizadas.append(valor.lower())
+
+    return hashes_normalizadas
+
+
+def normalizar_resultados(resultados):
+    resultados_normalizados = {}
+
+    for tipo, valores in resultados.items():
+        if tipo in ("md5", "sha1", "sha256"):
+            resultados_normalizados[tipo] = normalizar_hashes(valores)
+        else:
+            resultados_normalizados[tipo] = valores.copy()
+
+    return resultados_normalizados
 
 
 def analisar_conteudo(conteudo):

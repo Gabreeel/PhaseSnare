@@ -1,4 +1,4 @@
-from phasesnare import main, extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, formatar_resultados_txt
+from phasesnare import main, extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, normalizar_hashes, normalizar_resultados, formatar_resultados_txt
 import json
 
 def test_extrair_ipv4_valido():
@@ -309,7 +309,6 @@ def test_main_informa_falha_de_gravacao(tmp_path, capsys):
     assert codigo == 1
     
 
-
 def test_main_retorna_erro_quando_entrada_nao_existe(tmp_path, capsys):
     entrada = tmp_path / "inexistente.txt"
     codigo = main(str(entrada), "json")
@@ -320,3 +319,96 @@ def test_main_retorna_erro_quando_entrada_nao_existe(tmp_path, capsys):
     assert codigo == 1
     assert "Erro ao ler arquivo" in mensagem
     assert str(entrada) in mensagem
+
+
+def test_extrair_urls_continua_apos_url_malformada():
+    conteudo = (
+        "https://example.com/antes "
+        "https://[broken "
+        "https://example.org/depois"
+    )
+
+    urls, invalidas = extrair_urls(conteudo)
+
+    assert urls == [
+        "https://example.com/antes",
+        "https://example.org/depois",
+    ]
+    assert invalidas == ["https://[broken"]
+
+
+def test_extrair_urls_com_esquema_em_maiusculas():
+    urls, invalidas = extrair_urls(
+        "HTTP://example.com/Antes HTTPS://example.org/Depois"
+    )
+
+    assert urls == [
+        "HTTP://example.com/Antes",
+        "HTTPS://example.org/Depois",
+    ]
+    assert invalidas == []
+
+
+def test_extrair_urls_rejeita_portas_invalidas():
+    urls, invalidas = extrair_urls(
+        "https://example.com:8443/ok "
+        "https://example.com:99999/fora "
+        "https://example.com:abc/texto"
+    )
+
+    assert urls == ["https://example.com:8443/ok"]
+    assert invalidas == [
+        "https://example.com:99999/fora",
+        "https://example.com:abc/texto",
+    ]
+
+
+def test_normalizar_hashes_preserva_entrada_e_duplicatas():
+    original = [
+        "5D41402ABC4B2A76B9719D911017C592",
+        "5d41402abc4b2a76b9719d911017c592",
+    ]
+    copia = original.copy()
+
+    normalizados = normalizar_hashes(original)
+
+    assert normalizados == [
+        "5d41402abc4b2a76b9719d911017c592",
+        "5d41402abc4b2a76b9719d911017c592",
+    ]
+    assert original == copia
+    assert normalizados is not original
+
+
+def test_normalizar_hashes_lista_vazia():
+    assert normalizar_hashes([]) == []
+
+
+def test_normalizar_resultados():
+    original = {
+        "md5": ["5D41402ABC4B2A76B9719D911017C592"],
+        "sha1": ["DA39A3EE5E6B4B0D3255BFEF95601890AFD80709"],
+        "sha256": [
+            "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD"
+        ],
+        "urls": ["https://example.com/Antes"],
+        "ipv4": [],
+    }
+    copia = {tipo: valores.copy() for tipo, valores in original.items()}
+
+    normalizados = normalizar_resultados(original)
+
+    for tipo in ("md5", "sha1", "sha256"):
+        assert normalizados[tipo] == [original[tipo][0].lower()]
+
+    assert normalizados["urls"] == original["urls"]
+    assert normalizados["ipv4"] == []
+    assert original == copia
+    assert normalizados is not original
+
+    for tipo in original:
+        assert normalizados[tipo] is not original[tipo]
+
+
+def test_normalizar_resultados_vazios():
+    assert normalizar_resultados({}) == {}
