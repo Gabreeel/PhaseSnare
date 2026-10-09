@@ -1,4 +1,4 @@
-from phasesnare import main, extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, normalizar_hashes, normalizar_resultados, formatar_resultados_txt
+from phasesnare import main, extrair_ipv4, extrair_sha256, extrair_cves, extrair_md5, extrair_sha1, analisar_conteudo, formatar_resultados_json, extrair_ipv6, extrair_urls, extrair_emails, extrair_dominios, deduplicar_resultados, normalizar_hashes, normalizar_resultados, formatar_resultados_txt, comparar_valores, comparar_resultados
 import json
 
 def test_extrair_ipv4_valido():
@@ -412,3 +412,115 @@ def test_normalizar_resultados():
 
 def test_normalizar_resultados_vazios():
     assert normalizar_resultados({}) == {}
+
+
+def test_comparar_valores():
+    valores_a = ["b", "a", "b"]
+    valores_b = ["c", "b"]
+
+    resultado = comparar_valores(valores_a, valores_b)
+
+    assert resultado == {
+        "comuns": ["b"],
+        "somente_a": ["a"],
+        "somente_b": ["c"],
+    }
+    assert valores_a == ["b", "a", "b"]
+    assert valores_b == ["c", "b"]
+
+
+def test_comparar_valores_ordena_resultados():
+    resultado = comparar_valores(
+        ["z", "b", "a", "d"],
+        ["y", "d", "b", "c"],
+    )
+
+    assert resultado == {
+        "comuns": ["b", "d"],
+        "somente_a": ["a", "z"],
+        "somente_b": ["c", "y"],
+    }
+
+
+def test_comparar_valores_com_lista_vazia():
+    assert comparar_valores([], ["b", "a"]) == {
+        "comuns": [],
+        "somente_a": [],
+        "somente_b": ["a", "b"],
+    }
+
+
+def test_comparar_valores_ambas_vazias():
+    assert comparar_valores([], []) == {
+        "comuns": [],
+        "somente_a": [],
+        "somente_b": [],
+    }
+
+
+def test_comparar_resultados_normaliza_hashes():
+    hash_original = "5D41402ABC4B2A76B9719D911017C592"
+    resultados_a = {
+        "md5": [hash_original],
+        "ipv4": ["192.0.2.10"],
+        "urls_falsos_candidatos": ["https://[broken"],
+    }
+    resultados_b = {
+        "md5": [hash_original.lower()],
+        "dominios": ["example.com"],
+    }
+
+    comparacao = comparar_resultados(resultados_a, resultados_b)
+
+    assert comparacao["md5"] == {
+        "comuns": [hash_original.lower()],
+        "somente_a": [],
+        "somente_b": [],
+    }
+    assert comparacao["ipv4"] == {
+        "comuns": [],
+        "somente_a": ["192.0.2.10"],
+        "somente_b": [],
+    }
+    assert comparacao["dominios"] == {
+        "comuns": [],
+        "somente_a": [],
+        "somente_b": ["example.com"],
+    }
+    assert comparacao["urls"] == {
+        "comuns": [],
+        "somente_a": [],
+        "somente_b": [],
+    }
+    assert "urls_falsos_candidatos" not in comparacao
+    assert resultados_a["md5"] == [hash_original]
+
+
+def test_comparar_resultados_vazios():
+    comparacao = comparar_resultados({}, {})
+
+    assert set(comparacao) == {
+        "ipv4", "ipv6", "md5", "sha1", "sha256",
+        "cves", "urls", "emails", "dominios",
+    }
+    for resultado in comparacao.values():
+        assert resultado == {
+            "comuns": [],
+            "somente_a": [],
+            "somente_b": [],
+        }
+
+
+def test_comparar_resultados_normaliza_dominios():
+    resultados_a = {"dominios": ["Example.COM", "Example.COM"]}
+    resultados_b = {"dominios": ["example.com", "outro.example"]}
+
+    comparacao = comparar_resultados(resultados_a, resultados_b)
+
+    assert comparacao["dominios"] == {
+        "comuns": ["example.com"],
+        "somente_a": [],
+        "somente_b": ["outro.example"],
+    }
+    assert resultados_a["dominios"] == ["Example.COM", "Example.COM"]
+    assert resultados_b["dominios"] == ["example.com", "outro.example"]

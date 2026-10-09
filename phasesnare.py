@@ -202,10 +202,44 @@ def normalizar_resultados(resultados):
     for tipo, valores in resultados.items():
         if tipo in ("md5", "sha1", "sha256"):
             resultados_normalizados[tipo] = normalizar_hashes(valores)
+        elif tipo == "dominios":
+            resultados_normalizados[tipo] = [
+                valor.lower() for valor in valores
+            ]
         else:
             resultados_normalizados[tipo] = valores.copy()
 
     return resultados_normalizados
+
+
+def comparar_valores(valores_a, valores_b):
+    conjunto_a = set(valores_a)
+    conjunto_b = set(valores_b)
+    lista_a = conjunto_a - conjunto_b
+    lista_b = conjunto_b - conjunto_a
+    ambas_listas = conjunto_a & conjunto_b
+
+    return{
+        "comuns": sorted(ambas_listas),
+        "somente_a": sorted(lista_a),
+        "somente_b": sorted(lista_b),
+    }
+
+
+def comparar_resultados(resultados_a, resultados_b):
+    normalizados_a = normalizar_resultados(resultados_a)
+    normalizados_b = normalizar_resultados(resultados_b)
+    comparacao = {}
+    tipos = (
+    "ipv4", "ipv6", "md5", "sha1", "sha256",
+    "cves", "urls", "emails", "dominios",
+    )
+
+    for tipo in tipos:
+        comparacao[tipo] = comparar_valores(normalizados_a.get(tipo,[]), normalizados_b.get(tipo,[]))
+
+    return comparacao
+
 
 
 def analisar_conteudo(conteudo):
